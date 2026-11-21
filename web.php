@@ -1,32 +1,12 @@
-<?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StudentController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
+// إدارة المستخدمين
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/users', [UserController::class, 'index']);
 
-Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+Route::post('/users', [UserController::class, 'store']);
 
-Route::post('/students', [StudentController::class, 'store'])->name('students.store');
+Route::get('/users/edit/{id}', [UserController::class, 'edit']);
 
-Route::get('/tasks', function () {
-    $tasks = DB::table('tasks')->get();
-    return view('tasks', compact('tasks'));
-});
+Route::put('/users/update/{id}', [UserController::class, 'update']);
 
-Route::post('/edit/{id}', function ($id) {
-    $task = DB::table('tasks')->where('id', $id)->first();
-    $tasks = DB::table('tasks')->get();
-    return view('tasks', compact('task', 'tasks'));
-});
-
-Route::post('/update', function (Request $request) {
-    DB::table('tasks')->where('id', $request->id)->update([
-        'name' => $request->name
-    ]);
-    return redirect('/tasks');
-});
+Route::delete('/users/delete/{id}', [UserController::class, 'destroy']);
