@@ -3,21 +3,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // عرض جميع المستخدمين
+    // عرض المستخدمين
     public function index()
     {
         $users = DB::table('users')->get();
-
         return view('users', compact('users'));
     }
 
-    // إضافة مستخدم جديد
+    // إضافة مستخدم
     public function store(Request $request)
     {
         $request->validate([
@@ -35,20 +35,16 @@ class UserController extends Controller
         return redirect('/users');
     }
 
-    // الانتقال إلى صفحة التعديل
+    // تعديل المستخدم
     public function edit($id)
     {
-        $user = DB::table('users')->where('id', $id)->first();
+        $user = User::findOrFail($id);
         $users = DB::table('users')->get();
-
-        if (!$user) {
-            abort(404);
-        }
 
         return view('users', compact('user', 'users'));
     }
 
-    // تحديث بيانات المستخدم
+    // تحديث المستخدم باستخدام Eloquent
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -56,28 +52,29 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
         ]);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-        ];
+        $user = User::findOrFail($id);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
 
         if ($request->filled('password')) {
             $request->validate([
                 'password' => 'min:8',
             ]);
 
-            $data['password'] = Hash::make($request->password);
+            $user->password = Hash::make($request->password);
         }
 
-        DB::table('users')->where('id', $id)->update($data);
+        $user->save();
 
         return redirect('/users');
     }
 
-    // حذف المستخدم
+    // حذف المستخدم باستخدام Eloquent
     public function destroy($id)
     {
-        DB::table('users')->where('id', $id)->delete();
+        $user = User::findOrFail($id);
+        $user->delete();
 
         return redirect('/users');
     }
